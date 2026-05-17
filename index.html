@@ -2,66 +2,546 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Her Health - Period Tracker & Self Care</title>
-  
-  <!-- Comic Neue font for bubbly fun vibe -->
-  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>PATAKA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.cdnfonts.com/css/samarkan" rel="stylesheet" />
 
-  <!-- Your CSS file -->
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONTRIBUTOR 1 — DESIGN TOKENS
+       branch: feature/hero-cinematic
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    :root {
+      --bg-0: #030108;
+      --bg-1: #07030f;
+      --bg-2: #0c0416;
+      --bg-3: #130518;
+
+      --wine:      #6b0f1a;
+      --maroon:    #8b1a2a;
+      --cherry:    #a02038;
+      --cherry-lt: #c03050;
+      --plum-red:  #7a1030;
+
+      --moss:   #1a3a20;
+      --forest: #244d2a;
+      --sage:   #3a6640;
+
+      --ivory: #ede0d8;
+      --cream: #c8b5aa;
+      --muted: #7a6068;
+
+      --ease-film: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 16px; }
+
+    body {
+      background: var(--bg-0);
+      color: var(--ivory);
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+      cursor: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONTRIBUTOR 1 — HEART CURSOR
+       branch: feature/cursor-system
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #c-heart {
+      position: fixed;
+      width: 20px; height: 20px;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: width .25s, height .25s, opacity .4s;
+    }
+    #c-heart svg {
+      width: 100%; height: 100%;
+      filter:
+        drop-shadow(0 0 4px rgba(160, 32, 56, 0.9))
+        drop-shadow(0 0 10px rgba(107, 15, 26, 0.5));
+    }
+    #c-ring {
+      position: fixed;
+      width: 44px; height: 44px;
+      border: 0.5px solid rgba(160, 32, 56, 0.22);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9997;
+      transform: translate(-50%, -50%);
+      transition: width .4s var(--ease-film), height .4s var(--ease-film), border-color .4s;
+    }
+    body.hov #c-heart { width: 26px; height: 26px; }
+    body.hov #c-ring  { width: 58px; height: 58px; border-color: rgba(160, 32, 56, 0.48); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONTRIBUTOR 1 — FILM GRAIN
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .grain {
+      position: fixed; inset: 0;
+      z-index: 300; pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px;
+      animation: gr .7s steps(1) infinite;
+      mix-blend-mode: overlay;
+    }
+    @keyframes gr {
+      0%  { background-position: 0 0 }
+      20% { background-position: -35px 45px }
+      40% { background-position: 50px -30px }
+      60% { background-position: -55px 20px }
+      80% { background-position: 25px -50px }
+      100%{ background-position: 0 0 }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONTRIBUTOR 1 — HERO SCENE
+       branch: feature/hero-cinematic
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #hero {
+      position: relative;
+      width: 100%; height: 100svh;
+      min-height: 580px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+
+      background:
+        radial-gradient(ellipse 85% 55% at 50% 105%,
+          rgba(90, 10, 22, 0.65) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 45% at 8% 50%,
+          rgba(60, 8, 18, 0.45) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 40% at 92% 25%,
+          rgba(40, 8, 14, 0.38) 0%, transparent 55%),
+        radial-gradient(ellipse 35% 30% at 88% 12%,
+          rgba(20, 45, 22, 0.16) 0%, transparent 60%),
+        linear-gradient(175deg, #04010a 0%, #080214 40%, #0e0418 70%, #060110 100%);
+    }
+
+    #hero::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 75%; height: 280px;
+      background: radial-gradient(ellipse,
+        rgba(100, 12, 28, 0.12) 0%, transparent 68%);
+      filter: blur(35px);
+      pointer-events: none; z-index: 1;
+    }
+
+    #dust {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 2; pointer-events: none;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONTRIBUTOR 1 — CORE LAYOUT
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .core {
+      position: relative; z-index: 10;
+      text-align: center;
+      padding: 0 2rem;
+      display: flex; flex-direction: column;
+      align-items: center;
+      will-change: opacity, transform;
+    }
+
+    .eyebrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 8px; font-weight: 300;
+      letter-spacing: 0.48em;
+      text-transform: uppercase;
+      color: rgba(180, 100, 115, 0.55);
+      margin-bottom: 1.8rem;
+      opacity: 0; transform: translateY(5px);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONTRIBUTOR 1 — SAMARKAN LOGO
+       branch: feature/hero-cinematic
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .logo-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      margin-bottom: 1.6rem;
+    }
+
+    .logo-halo {
+      position: absolute;
+      inset: -30px -10%;
+      background: radial-gradient(ellipse,
+        rgba(120, 14, 32, 0.14) 0%,
+        rgba(80, 8, 20, 0.06) 50%,
+        transparent 72%);
+      filter: blur(18px);
+      pointer-events: none; z-index: -1;
+      opacity: 0;
+    }
+
+    .logo {
+      font-family: 'Samarkan', 'Palatino Linotype', serif;
+      font-size: clamp(60px, 12vw, 130px);
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      line-height: 1;
+      display: inline-block;
+
+      background: linear-gradient(
+        150deg,
+        #4a0810 0%,
+        #7a1428 16%,
+        #9e1f38 30%,
+        #be3050 44%,
+        #d04060 50%,
+        #be3050 56%,
+        #9e1f38 70%,
+        #7a1428 84%,
+        #4a0810 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+      opacity: 0;
+      filter: blur(26px);
+      transform: scale(0.92);
+      will-change: filter, opacity, transform;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONTRIBUTOR 1 — TAGLINE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .tagline {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(12.5px, 1.7vw, 17px);
+      font-weight: 400; font-style: italic;
+      color: var(--cream);
+      letter-spacing: 0.05em;
+      opacity: 0;
+      margin-bottom: 3rem;
+      min-height: 1.5em;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .tw-cur {
+      display: inline-block;
+      width: 1px; height: 1em;
+      background: rgba(160, 32, 56, 0.7);
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 1.1s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%,44%  { opacity: 1; }
+      50%,100% { opacity: 0; }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONTRIBUTOR 1 — SINGLE CTA
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .cta-wrap {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.85rem;
+      opacity: 0; transform: translateY(14px);
+    }
+
+    .btn-primary {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px; font-weight: 400;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 13px 44px;
+      background: linear-gradient(135deg,
+        #6b0f1a 0%, #8b1a2a 45%, #9e2035 55%, #7a1428 100%);
+      color: rgba(237, 224, 216, 0.92);
+      border: none; outline: none;
+      cursor: none;
+      position: relative; overflow: hidden;
+      transition: transform .4s var(--ease-film), box-shadow .4s var(--ease-film);
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute; top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      transition: left .65s ease;
+    }
+    .btn-primary:hover::after { left: 100%; }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(107, 15, 26, 0.35), 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    .btn-sub {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 11px; font-style: italic;
+      color: rgba(180, 100, 115, 0.42);
+      letter-spacing: 0.06em;
+    }
+
+    /* Forest green accent rule — identity mark */
+    .green-rule {
+      width: 28px; height: 0.5px;
+      background: linear-gradient(90deg, transparent, #3a6640, transparent);
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      transform: scaleX(0);
+      transform-origin: center;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CONTRIBUTOR 2 — PERF / ACCESSIBILITY
+       branch: feature/pwa-system
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    @media (prefers-reduced-motion: reduce) {
+      .grain { animation: none; }
+      .tw-cur { animation: none; opacity: 1; }
+    }
+    @media (hover: none) {
+      body { cursor: auto; }
+      #c-heart, #c-ring { display: none; }
+    }
+    @media (max-width: 480px) {
+      .btn-primary { padding: 13px 32px; }
+    }
+  </style>
 </head>
 <body>
 
-  <h1>Her Health 💖</h1>
-  <p>Your cute, caring, and fun period tracker & self-care buddy!</p>
-
-  <!-- Animated girl container -->
-  <div class="animation-container">
-    <lottie-player
-      src="https://assets10.lottiefiles.com/packages/lf20_iwmd6pyr.json"
-      background="transparent"
-      speed="1"
-      style="width: 300px; height: 300px;"
-      loop
-      autoplay>
-    </lottie-player>
+  <!-- CONTRIBUTOR 1 — Heart cursor -->
+  <div id="c-heart">
+    <svg viewBox="0 0 24 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 20.5C12 20.5 1.5 13.5 1.5 6.5C1.5 3.7 3.7 1.5 6.5 1.5C8.3 1.5 9.9 2.4 11 3.8C12.1 2.4 13.7 1.5 15.5 1.5C18.3 1.5 20.5 3.7 20.5 6.5C20.5 13.5 12 20.5 12 20.5Z"
+        fill="rgba(140,20,38,0.88)" stroke="rgba(190,48,80,0.55)" stroke-width="0.5"/>
+    </svg>
   </div>
+  <div id="c-ring"></div>
 
-  <!-- Period Tracker Input -->
-  <section>
-    <h2>Period Tracker</h2>
-    <label for="cycle-length">Cycle Length (days):</label><br />
-    <input type="number" id="cycle-length" min="20" max="45" placeholder="28" /><br />
+  <div class="grain" aria-hidden="true"></div>
 
-    <label for="last-period">Last Period Start Date:</label><br />
-    <input type="date" id="last-period" /><br />
+  <section id="hero" role="banner">
 
-    <button id="calculate-btn">Calculate Next Period & Fertile Days</button>
+    <canvas id="dust" aria-hidden="true"></canvas>
 
-    <div id="result"></div>
+    <div class="core" id="core">
+
+      <span class="eyebrow" id="eyebrow">emotional universe</span>
+
+      <div class="logo-wrap">
+        <div class="logo-halo" id="halo"></div>
+        <h1 class="logo" id="logo" aria-label="PATAKA">PATAKA</h1>
+      </div>
+
+      <p class="tagline" id="tagline" aria-live="polite">
+        <span id="tw"></span><span class="tw-cur" aria-hidden="true"></span>
+      </p>
+
+      <div class="green-rule" id="rule"></div>
+
+      <div class="cta-wrap" id="cta">
+        <button class="btn-primary" id="btnDecode">Decode Yourself</button>
+        <span class="btn-sub">khud ko parkhein.</span>
+      </div>
+
+    </div>
+
   </section>
 
-  <!-- Self-Care Journal -->
-  <section>
-    <h2>Self-Care Journal</h2>
-    <textarea id="journal" placeholder="Write your thoughts, feelings, or just rant here... 📝"></textarea><br />
-    <button id="save-journal">Save Journal Entry</button>
-    <div id="journal-feedback"></div>
-  </section>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-  <!-- Mental Health Rant Space -->
-  <section>
-    <h2>Mental Health Space 💬</h2>
-    <textarea id="rant" placeholder="Feel free to let it all out here!"></textarea><br />
-    <button id="save-rant">Save Rant</button>
-    <div id="rant-feedback"></div>
-  </section>
+  <script>
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CONTRIBUTOR 2 — CONFIG + DEVICE DETECTION
+     branch: feature/pwa-system
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  const CFG = {
+    tagline:   "every pataka burns differently.",
+    tw:        { min: 46, max: 90, space: 54, punct: 210 },
+    isTouch:   'ontouchstart' in window,
+    particles: (navigator.hardwareConcurrency || 4) <= 4 ? 38 : 62,
+  };
 
-  <!-- Lottie Player CDN -->
-  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CONTRIBUTOR 1 — HEART CURSOR
+     branch: feature/cursor-system
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  (function () {
+    if (CFG.isTouch) return;
+    const h = document.getElementById('c-heart');
+    const r = document.getElementById('c-ring');
+    let mx = innerWidth/2, my = innerHeight/2, tx = mx, ty = my;
 
-  <!-- Your JS file -->
-  <script src="script.js"></script>
+    document.addEventListener('mousemove', function show(e) {
+      mx = e.clientX; my = e.clientY;
+      h.style.opacity = '1';
+      document.removeEventListener('mousemove', show);
+    }, { once: true });
+
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+    (function tick() {
+      h.style.left = mx + 'px'; h.style.top = my + 'px';
+      tx += (mx - tx) * 0.08; ty += (my - ty) * 0.08;
+      r.style.left = tx + 'px'; r.style.top = ty + 'px';
+      requestAnimationFrame(tick);
+    })();
+
+    document.querySelectorAll('button').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('hov'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('hov'));
+    });
+  })();
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CONTRIBUTOR 1 — DUST PARTICLE SYSTEM
+     Wine · cherry · plum motes, rare forest-green
+     branch: feature/mandala-engine
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  (function () {
+    const cnv = document.getElementById('dust');
+    const ctx = cnv.getContext('2d');
+
+    function resize() { cnv.width = innerWidth; cnv.height = innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const COLS = [
+      [120, 16, 34],  // wine
+      [158, 28, 52],  // cherry
+      [90,   8, 22],  // deep plum-red
+      [36,  62, 38],  // forest green (rare)
+    ];
+
+    class Mote {
+      spawn(mid) {
+        this.x    = Math.random() * cnv.width;
+        this.y    = mid ? Math.random() * cnv.height : cnv.height + 6;
+        this.r    = 0.3 + Math.random() * 1.3;
+        this.vy   = -(0.05 + Math.random() * 0.3);
+        this.vx   = (Math.random() - 0.5) * 0.12;
+        this.life = 0;
+        this.max  = 220 + Math.random() * 300;
+        this.peak = 0.14 + Math.random() * 0.3;
+        const ci  = Math.random() < 0.1 ? 3 : Math.floor(Math.random() * 3);
+        this.col  = COLS[ci];
+        this.wave = Math.random() * Math.PI * 2;
+      }
+      constructor(mid) { this.spawn(mid); }
+
+      tick() {
+        this.life++;
+        this.x += this.vx + Math.sin(this.life * 0.014 + this.wave) * 0.09;
+        this.y += this.vy;
+        const f = 55;
+        if (this.life < f)             this.a = (this.life / f) * this.peak;
+        else if (this.life > this.max - f) this.a = ((this.max - this.life) / f) * this.peak;
+        else                           this.a = this.peak;
+        if (this.life >= this.max || this.y < -6) this.spawn(false);
+      }
+
+      draw() {
+        const [r,g,b] = this.col;
+        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 2.8);
+        grd.addColorStop(0,   `rgba(${r},${g},${b},${this.a})`);
+        grd.addColorStop(0.5, `rgba(${r},${g},${b},${this.a * 0.5})`);
+        grd.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r * 2.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    const pool = Array.from(
+      { length: CFG.particles },
+      (_, i) => new Mote(i < CFG.particles * 0.6)
+    );
+
+    (function loop() {
+      ctx.clearRect(0, 0, cnv.width, cnv.height);
+      pool.forEach(m => { m.tick(); m.draw(); });
+      requestAnimationFrame(loop);
+    })();
+  })();
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CONTRIBUTOR 1 — TYPEWRITER
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function typewrite(text, el) {
+    let i = 0;
+    const p = new Set(['.', ',', '!', '?', '—', '…']);
+    function step() {
+      if (i >= text.length) return;
+      el.textContent += text[i];
+      const c = text[i++];
+      const d = p.has(c)  ? CFG.tw.punct
+              : c === ' ' ? CFG.tw.space
+              : CFG.tw.min + Math.random() * (CFG.tw.max - CFG.tw.min);
+      setTimeout(step, d);
+    }
+    step();
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     CONTRIBUTOR 1 — GSAP CINEMATIC TIMELINE
+     branch: feature/hero-cinematic
+     darkness → logo materialises → silence → tagline → CTA
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  gsap.set('#logo',    { opacity: 0, filter: 'blur(26px)', scale: 0.92 });
+  gsap.set('#halo',    { opacity: 0 });
+  gsap.set('#eyebrow', { opacity: 0, y: 5 });
+  gsap.set('#tagline', { opacity: 0 });
+  gsap.set('#rule',    { opacity: 0, scaleX: 0 });
+  gsap.set('#cta',     { opacity: 0, y: 14 });
+
+  const tl = gsap.timeline({ delay: 0.3 });
+
+  tl.to('#eyebrow', {
+    opacity: 0.55, y: 0, duration: 1.1, ease: 'power2.out'
+  }, 0.5);
+
+  tl.to('#logo', {
+    opacity: 1, filter: 'blur(0px)', scale: 1,
+    duration: 2.8, ease: 'power3.out',
+  }, 1.4);
+
+  tl.to('#halo', { opacity: 1, duration: 2.2, ease: 'power2.out' }, 2.2);
+
+  /* intentional silence 4.2s → 4.9s */
+
+  tl.to('#tagline', {
+    opacity: 1, duration: 0.9, ease: 'power2.out',
+    onComplete() {
+      setTimeout(() => typewrite(CFG.tagline, document.getElementById('tw')), 350);
+    }
+  }, 4.9);
+
+  tl.to('#rule', {
+    opacity: 1, scaleX: 1,
+    duration: 1.0, ease: 'power2.inOut',
+    transformOrigin: 'center',
+  }, 7.0);
+
+  tl.to('#cta', {
+    opacity: 1, y: 0, duration: 1.1, ease: 'power3.out',
+  }, 7.2);
+
+  </script>
 </body>
 </html>
